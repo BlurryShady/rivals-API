@@ -1,0 +1,49 @@
+# --------------------
+# Environment variables
+# --------------------
+.env
+.env.*
+!.env.example
+
+# --------------------
+# Django / Python
+# --------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+db.sqlite3
+
+# --------------------
+# Media & static
+# --------------------
+media/
+staticfiles/
+
+# --------------------
+# Virtual environments
+# --------------------
+venv/
+.venv/
+
+# --------------------
+# OS / Editor junk
+# --------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --------------------
+# Logs
+# --------------------
+*.log
+
+# Visual Studio / VS Code / IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln
