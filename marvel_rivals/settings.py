@@ -1,31 +1,32 @@
 from pathlib import Path
 import os
+
 import dj_database_url
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 from dotenv import load_dotenv
+
+# -------------------------
+# Base
+# -------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# -------------------------
+# Security
+# -------------------------
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-dev-only-change-me")
 
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure--9ov4k!&s+zcl#21goaa()1k$2b#a*u=0zage@@vulig*^152m",
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes"}
 
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS",
-    "localhost,127.0.0.1",
-).split(",")
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+# -------------------------
+# Hosts / CSRF
+# -------------------------
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
 
+# Render adds this automatically.
 if render_host := os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(render_host)
 
@@ -33,53 +34,63 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         "DJANGO_CSRF_TRUSTED_ORIGINS",
-        "http://localhost:8000, http://127.0.0.1:8000, https://rivals.blurryshady.dev",
+        "http://localhost:8000,http://127.0.0.1:8000,https://rivals.blurryshady.dev",
     ).split(",")
     if origin.strip()
 ]
 
+# -------------------------
+# Logging / DRF throttles
+# -------------------------
 LOG_LEVEL = os.environ.get("DJANGO_LOG_LEVEL", "INFO")
 USER_THROTTLE_RATE = os.environ.get("DRF_USER_THROTTLE", "300/day")
 ANON_THROTTLE_RATE = os.environ.get("DRF_ANON_THROTTLE", "60/hour")
 LOGIN_THROTTLE_RATE = os.environ.get("DRF_LOGIN_THROTTLE", "10/minute")
 REGISTER_THROTTLE_RATE = os.environ.get("DRF_REGISTER_THROTTLE", "5/hour")
 
-
-# Application definition
-
+# -------------------------
+# Applications
+# -------------------------
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'cloudinary',
-    'cloudinary_storage',
-    
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Cloudinary
+    "cloudinary",
+    "cloudinary_storage",
+
     # Third party
-    'rest_framework',
-    'corsheaders',
-    'channels',
-    
-    # Apps for this project
-    'heroes',
-    'teams',
-    'rest_framework.authtoken',
-    'accounts',
+    "rest_framework",
+    "corsheaders",
+    "channels",
+    "rest_framework.authtoken",
+
+    # Local apps
+    "heroes",
+    "teams",
+    "accounts",
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'marvel_rivals.middleware.RequestIDMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+
+    # Request ID middleware
+    "marvel_rivals.middleware.RequestIDMiddleware",
+
+    # WhiteNoise for static on Render
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 ROOT_URLCONF = "marvel_rivals.urls"
@@ -102,28 +113,23 @@ TEMPLATES = [
 WSGI_APPLICATION = "marvel_rivals.wsgi.application"
 ASGI_APPLICATION = "marvel_rivals.asgi.application"
 
+# -------------------------
+# Channels / Redis
+# -------------------------
 REDIS_URL = os.environ.get("REDIS_URL")
-
 if REDIS_URL:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [REDIS_URL],
-            },
+            "CONFIG": {"hosts": [REDIS_URL]},
         }
     }
 else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
-        }
-    }
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# -------------------------
+# Database (Neon via DATABASE_URL)
+# -------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL:
@@ -142,62 +148,58 @@ else:
         }
     }
 
-
+# -------------------------
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# -------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        ),
-    },
-    {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "MinimumLengthValidator"
-        ),
-    },
-    {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "CommonPasswordValidator"
-        ),
-    },
-    {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "NumericPasswordValidator"
-        ),
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-
+# -------------------------
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# -------------------------
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# -------------------------
+# Static files
+# -------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = (
-    [BASE_DIR / "static"]
-    if (BASE_DIR / "static").exists()
-    else []
-)
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
 
+# -------------------------
+# Cloudinary (media) + Django 5.2 storage config
+# -------------------------
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+}
+
+STORAGES = {
+    # MEDIA (uploads): Cloudinary
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    # STATIC: WhiteNoise compressed manifest
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+# Local-only media path (useful in dev. Not used in prod since STORAGES["default"] is Cloudinary)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# -------------------------
+# Security headers (Render-friendly)
+# -------------------------
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
@@ -205,98 +207,68 @@ SECURE_SSL_REDIRECT = (not DEBUG) and (
     os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "True").lower() in {"1", "true", "yes"}
 )
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-}
-
-
+# -------------------------
+# CORS
+# -------------------------
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Vite default port
+    "http://localhost:5173",
     "http://localhost:3000",
-    "https://rivals.blurryshady.dev", #My deployed frontend
+    "https://rivals.blurryshady.dev",
 ]
 
+# -------------------------
+# DRF
+# -------------------------
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_PAGINATION_CLASS': (
-        'rest_framework.pagination.PageNumberPagination'
-    ),
-    'PAGE_SIZE': 50,
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.UserRateThrottle',
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.ScopedRateThrottle',
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 50,
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
     ],
-    'DEFAULT_THROTTLE_RATES': {
-        'user': USER_THROTTLE_RATE,
-        'anon': ANON_THROTTLE_RATE,
-        'auth-login': LOGIN_THROTTLE_RATE,
-        'auth-register': REGISTER_THROTTLE_RATE,
+    "DEFAULT_THROTTLE_RATES": {
+        "user": USER_THROTTLE_RATE,
+        "anon": ANON_THROTTLE_RATE,
+        "auth-login": LOGIN_THROTTLE_RATE,
+        "auth-register": REGISTER_THROTTLE_RATE,
     },
 }
 
-if DEBUG:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+# -------------------------
+# Default primary key
+# -------------------------
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# -------------------------
+# Logging
+# -------------------------
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            'format': (
-                '[%(asctime)s] %(levelname)s %(request_id)s '
-                '%(name)s:%(lineno)d %(message)s'
-            ),
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            "format": "[%(asctime)s] %(levelname)s %(request_id)s %(name)s:%(lineno)d %(message)s",
         },
     },
-    'filters': {
-        'request_id': {
-            '()': 'marvel_rivals.middleware.RequestIDFilter',
+    "filters": {
+        "request_id": {"()": "marvel_rivals.middleware.RequestIDFilter"},
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+            "filters": ["request_id"],
         },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
-            'filters': ['request_id'],
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': LOG_LEVEL,
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
-        'accounts': {
-            'handlers': ['console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
-        'teams': {
-            'handlers': ['console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
-        'heroes': {
-            'handlers': ['console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
+    "root": {"handlers": ["console"], "level": LOG_LEVEL},
+    "loggers": {
+        "django": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
+        "accounts": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
+        "teams": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
+        "heroes": {"handlers": ["console"], "level": LOG_LEVEL, "propagate": False},
     },
 }

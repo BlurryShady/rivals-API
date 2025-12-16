@@ -39,13 +39,6 @@ def safe_name(name: str) -> str:
 
 
 def attach_media_if_exists(hero: Hero) -> None:
-    """
-    Attach avatar + banner from ASSETS if files exist.
-
-    Filenames:
-      <SafeName>_Deluxe_Avatar.png
-      <SafeName>_banner.png
-    """
     base = safe_name(hero.name)
 
     avatar_filename = f"{base}_Deluxe_Avatar.png"
@@ -57,24 +50,19 @@ def attach_media_if_exists(hero: Hero) -> None:
 
     changed = False
 
-    # Avatar: attach if missing OR if still pointing to old local media path
-    current_name = hero.image.name or "" if hero.image else ""
-    should_replace_avatar = (not hero.image) or current_name.startswith(("media/", "heroes/"))
+    # FORCE upload once (recommended to fix your current broken DB pointers)
+    FORCE_UPLOAD = os.environ.get("FORCE_HERO_MEDIA_UPLOAD", "0") == "1"
 
     if avatar_path.exists():
-        if should_replace_avatar:
+        if FORCE_UPLOAD or not hero.image:
             with avatar_path.open("rb") as f:
                 hero.image.save(avatar_filename, File(f), save=False)
             changed = True
     else:
         print(f"  ! Missing avatar file for {hero.name}: {avatar_path.name}")
 
-    # Banner: attach if missing OR if still pointing to old local media path
-    current_banner_name = hero.banner.name or "" if hero.banner else ""
-    should_replace_banner = (not hero.banner) or current_banner_name.startswith(("media/", "heroes/"))
-
     if banner_path.exists():
-        if should_replace_banner:
+        if FORCE_UPLOAD or not hero.banner:
             with banner_path.open("rb") as f:
                 hero.banner.save(banner_filename, File(f), save=False)
             changed = True
