@@ -210,7 +210,8 @@ DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite default port
-    "http://localhost:3000",  # Just in case
+    "http://localhost:3000",
+    "https://rivals.blurryshady.dev", #My deployed frontend
 ]
 
 REST_FRAMEWORK = {
