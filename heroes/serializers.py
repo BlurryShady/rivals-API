@@ -2,25 +2,18 @@ from rest_framework import serializers
 from .models import Hero
 
 class HeroListSerializer(serializers.ModelSerializer):
-    synergies = serializers.SerializerMethodField()
-    counters = serializers.SerializerMethodField()
-
     image_url = serializers.SerializerMethodField()
     banner_url = serializers.SerializerMethodField()
+    synergies = serializers.SerializerMethodField()
+    counters = serializers.SerializerMethodField()
 
     class Meta:
         model = Hero
         fields = [
-            "id",
-            "name",
-            "role",
-            "image_url",
-            "banner_url",
-            "description",
-            "difficulty",
-            "playstyle_tags",
-            "synergies",
-            "counters",
+            "id", "name", "role",
+            "image_url", "banner_url",
+            "description", "difficulty", "playstyle_tags",
+            "synergies", "counters",
         ]
 
     def get_image_url(self, obj):
@@ -30,11 +23,10 @@ class HeroListSerializer(serializers.ModelSerializer):
         return obj.banner.url if obj.banner else None
 
     def get_synergies(self, obj):
-        return [hero.name for hero in obj.synergies.all()]
+        return [h.name for h in obj.synergies.all()]
 
     def get_counters(self, obj):
-        return [hero.name for hero in obj.counters.all()]
-
+        return [h.name for h in obj.counters.all()]
 
 class HeroDetailSerializer(serializers.ModelSerializer):
     synergies = serializers.SerializerMethodField()
