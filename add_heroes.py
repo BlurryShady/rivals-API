@@ -58,8 +58,11 @@ def attach_media_if_exists(hero: Hero) -> None:
     changed = False
 
     # Avatar: set only if empty
-    if not hero.image:
-        if avatar_path.exists():
+# Avatar: attach if missing OR file is still pointing to local /media (old)
+        current_name = hero.image.name or ""
+        should_replace_avatar = (not hero.image) or current_name.startswith("heroes/") or current_name.startswith("media/")
+
+        if should_replace_avatar and avatar_path.exists():
             with avatar_path.open("rb") as f:
                 hero.image.save(avatar_filename, File(f), save=False)
             changed = True
