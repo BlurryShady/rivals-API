@@ -193,9 +193,10 @@ STORAGES = {
     },
 }
 
-# Local-only media path (useful in dev. Not used in prod since STORAGES["default"] is Cloudinary)
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Local-only media path (useful in dev). In prod, media is served by Cloudinary via STORAGES["default"].
+if DEBUG:
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
 # -------------------------
 # Security headers (Render-friendly)
