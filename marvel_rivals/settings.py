@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-
 import dj_database_url
 from dotenv import load_dotenv
 
@@ -10,6 +9,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+import cloudinary 
 # -------------------------
 # Security
 # -------------------------
@@ -148,6 +148,10 @@ else:
         }
     }
 
+CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+if CLOUDINARY_URL:
+    cloudinary.config(cloudinary_url=CLOUDINARY_URL, secure=True)
+
 # -------------------------
 # Password validation
 # -------------------------
@@ -176,11 +180,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else 
 # -------------------------
 # Cloudinary (media) + Django 5.2 storage config
 # -------------------------
-CLOUDINARY_STORAGE = {
-    "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-    "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-}
 
 STORAGES = {
     # MEDIA (uploads): Cloudinary
