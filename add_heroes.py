@@ -59,7 +59,7 @@ def attach_media_if_exists(hero: Hero) -> None:
 
     # Avatar: attach if missing OR if still pointing to old local media path
     current_name = hero.image.name or "" if hero.image else ""
-    should_replace_avatar = (not hero.image) or current_name.startswith("media/")
+    should_replace_avatar = (not hero.image) or current_name.startswith(("media/", "heroes/"))
 
     if avatar_path.exists():
         if should_replace_avatar:
@@ -71,7 +71,7 @@ def attach_media_if_exists(hero: Hero) -> None:
 
     # Banner: attach if missing OR if still pointing to old local media path
     current_banner_name = hero.banner.name or "" if hero.banner else ""
-    should_replace_banner = (not hero.banner) or current_banner_name.startswith("media/")
+    should_replace_banner = (not hero.banner) or current_banner_name.startswith(("media/", "heroes/"))
 
     if banner_path.exists():
         if should_replace_banner:
