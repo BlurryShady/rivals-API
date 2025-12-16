@@ -57,23 +57,24 @@ def attach_media_if_exists(hero: Hero) -> None:
 
     changed = False
 
-    # Avatar: set only if empty
-# Avatar: attach if missing OR file is still pointing to local /media (old)
-        current_name = hero.image.name or ""
-        should_replace_avatar = (not hero.image) or current_name.startswith("heroes/") or current_name.startswith("media/")
+    # Avatar: attach if missing OR if still pointing to old local media path
+    current_name = hero.image.name or "" if hero.image else ""
+    should_replace_avatar = (not hero.image) or current_name.startswith("media/")
 
-        if should_replace_avatar and avatar_path.exists():
+    if avatar_path.exists():
+        if should_replace_avatar:
             with avatar_path.open("rb") as f:
                 hero.image.save(avatar_filename, File(f), save=False)
             changed = True
-        else:
-            print(f"  ! Missing avatar file for {hero.name}: {avatar_path.name}")
+    else:
+        print(f"  ! Missing avatar file for {hero.name}: {avatar_path.name}")
 
-    # Banner: set if empty OR if filename differs (fixes old random suffix filenames)
+    # Banner: attach if missing OR if still pointing to old local media path
+    current_banner_name = hero.banner.name or "" if hero.banner else ""
+    should_replace_banner = (not hero.banner) or current_banner_name.startswith("media/")
+
     if banner_path.exists():
-        current_file = Path(hero.banner.name).name if hero.banner else ""
-
-        if (not hero.banner) or (current_file != banner_filename):
+        if should_replace_banner:
             with banner_path.open("rb") as f:
                 hero.banner.save(banner_filename, File(f), save=False)
             changed = True
