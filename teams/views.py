@@ -124,11 +124,15 @@ class TeamViewSet(viewsets.ModelViewSet):
                 comment,
                 context={'request': request},
             )
-            
+
             try:
                 self._broadcast_comment(team.slug, response_serializer.data)
             except Exception:
                 logger.exception("Comment broadcast failed (Redis/Channels). Comment saved anyway.")
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_201_CREATED,
+        )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
