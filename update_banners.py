@@ -1,3 +1,8 @@
+raise SystemExit(
+    "DO NOT RUN: This script assigns banner strings and does NOT upload to Cloudinary. "
+    "Use add_heroes.py with FORCE_HERO_MEDIA_UPLOAD=1 instead."
+)
+
 import os
 import django
 

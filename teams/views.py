@@ -14,7 +14,9 @@ from .serializers import (
     TeamCreateSerializer,
     CommentSerializer,
 )
+import logging
 
+logger = logging.getLogger(__name__)
 
 class TeamViewSet(viewsets.ModelViewSet):
     """
@@ -122,11 +124,12 @@ class TeamViewSet(viewsets.ModelViewSet):
                 comment,
                 context={'request': request},
             )
-            self._broadcast_comment(team.slug, response_serializer.data)
-            return Response(
-                response_serializer.data,
-                status=status.HTTP_201_CREATED,
-            )
+            
+            try:
+                self._broadcast_comment(team.slug, response_serializer.data)
+            except Exception:
+                logger.exception("Comment broadcast failed (Redis/Channels). Comment saved anyway.")
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(
