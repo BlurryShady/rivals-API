@@ -117,7 +117,10 @@ ASGI_APPLICATION = "marvel_rivals.asgi.application"
 # Channels / Redis
 # -------------------------
 REDIS_URL = os.environ.get("REDIS_URL")
-if REDIS_URL:
+
+USE_REDIS_CHANNEL_LAYER = os.environ.get("USE_REDIS_CHANNEL_LAYER", "0").lower() in {"1", "true", "yes"}
+
+if REDIS_URL and USE_REDIS_CHANNEL_LAYER:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -126,7 +129,6 @@ if REDIS_URL:
     }
 else:
     CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
-
 # -------------------------
 # Database (Neon via DATABASE_URL)
 # -------------------------
