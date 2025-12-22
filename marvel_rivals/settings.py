@@ -20,13 +20,27 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes"}
 # -------------------------
 # Hosts / CSRF
 # -------------------------
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if host.strip()
-]
+def _split_csv_env(name: str, default: str) -> list[str]:
+    return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
+
+ALLOWED_HOSTS = _split_csv_env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 # Render adds this automatically.
+if render_host := os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    ALLOWED_HOSTS.append(render_host)
+
+# (local + real frontend domain; pages.dev optional for testing)
+CSRF_TRUSTED_ORIGINS = _split_csv_env(
+    "DJANGO_CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8000,"
+    "http://127.0.0.1:8000,"
+    "http://localhost:5173,"
+    "http://localhost:3000,"
+    "https://rivals.blurryshady.dev,"
+    "https://rivals-web-834.pages.dev",
+)
+
+# Render adds this automatically. (Not being used at the moment, I've switched to Heroku but leaving here for Render deployments in future.)
 if render_host := os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(render_host)
 
@@ -217,6 +231,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://rivals.blurryshady.dev",
     "https://api.rivals.blurryshady.dev",
+    "https://rivals-web-834.pages.dev",
 ]
 
 # -------------------------
