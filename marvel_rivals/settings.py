@@ -38,8 +38,10 @@ CSRF_TRUSTED_ORIGINS = _split_csv_env(
     "http://127.0.0.1:8000,"
     "http://localhost:5173,"
     "http://localhost:3000,"
-    "https://rivals.blurryshady.dev",
+    "https://rivals.blurryshady.dev,"
+    "https://api.rivals.blurryshady.dev"
 )
+
 
 # -------------------------
 # CORS
