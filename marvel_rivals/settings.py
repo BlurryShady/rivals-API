@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import dj_database_url
+import cloudinary 
 from dotenv import load_dotenv
 
 # -------------------------
@@ -9,7 +10,6 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-import cloudinary 
 # -------------------------
 # Security
 # -------------------------
@@ -23,35 +23,36 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes"}
 def _split_csv_env(name: str, default: str) -> list[str]:
     return [item.strip() for item in os.environ.get(name, default).split(",") if item.strip()]
 
-ALLOWED_HOSTS = _split_csv_env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+ALLOWED_HOSTS = _split_csv_env(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1",
+)
 
-# Render adds this automatically.
+# If you ever deploy on Render again
 if render_host := os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(render_host)
 
-# (local + real frontend domain; pages.dev optional for testing)
 CSRF_TRUSTED_ORIGINS = _split_csv_env(
     "DJANGO_CSRF_TRUSTED_ORIGINS",
     "http://localhost:8000,"
     "http://127.0.0.1:8000,"
     "http://localhost:5173,"
     "http://localhost:3000,"
-    "https://rivals.blurryshady.dev,"
-    "https://rivals-web-834.pages.dev",
+    "https://rivals.blurryshady.dev",
 )
 
-# Render adds this automatically. (Not being used at the moment, I've switched to Heroku but leaving here for Render deployments in future.)
-if render_host := os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
-    ALLOWED_HOSTS.append(render_host)
-
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get(
-        "DJANGO_CSRF_TRUSTED_ORIGINS",
-        "http://localhost:8000,http://127.0.0.1:8000,https://rivals.blurryshady.dev",
-    ).split(",")
-    if origin.strip()
+# -------------------------
+# CORS
+# -------------------------
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://rivals.blurryshady.dev",
 ]
+
+
+# If you want to allow it, uncomment this (only for testing on Pages):
+# CORS_ALLOWED_ORIGINS.append("https://rivals-web-834.pages.dev")
 
 # -------------------------
 # Logging / DRF throttles
@@ -222,17 +223,6 @@ CSRF_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = (not DEBUG) and (
     os.environ.get("DJANGO_SECURE_SSL_REDIRECT", "True").lower() in {"1", "true", "yes"}
 )
-
-# -------------------------
-# CORS
-# -------------------------
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://rivals.blurryshady.dev",
-    "https://api.rivals.blurryshady.dev",
-    "https://rivals-web-834.pages.dev",
-]
 
 # -------------------------
 # DRF
