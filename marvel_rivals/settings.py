@@ -1,7 +1,7 @@
 from pathlib import Path
 import os
 import dj_database_url
-import cloudinary 
+import cloudinary
 from dotenv import load_dotenv
 
 # -------------------------
@@ -14,7 +14,6 @@ load_dotenv(BASE_DIR / ".env")
 # Security
 # -------------------------
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-dev-only-change-me")
-
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in {"1", "true", "yes"}
 
 # -------------------------
@@ -42,7 +41,6 @@ CSRF_TRUSTED_ORIGINS = _split_csv_env(
     "https://api.rivals.blurryshady.dev"
 )
 
-
 # -------------------------
 # CORS
 # -------------------------
@@ -52,8 +50,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://rivals.blurryshady.dev",
 ]
 
-
-# If you want to allow it, uncomment this (only for testing on Pages):
+# uncomment this if you want testing on Pages:
 # CORS_ALLOWED_ORIGINS.append("https://rivals-web-834.pages.dev")
 
 # -------------------------
@@ -134,7 +131,6 @@ ASGI_APPLICATION = "marvel_rivals.asgi.application"
 # Channels / Redis
 # -------------------------
 REDIS_URL = os.environ.get("REDIS_URL")
-
 USE_REDIS_CHANNEL_LAYER = os.environ.get("USE_REDIS_CHANNEL_LAYER", "0").lower() in {"1", "true", "yes"}
 
 if REDIS_URL and USE_REDIS_CHANNEL_LAYER:
@@ -146,8 +142,9 @@ if REDIS_URL and USE_REDIS_CHANNEL_LAYER:
     }
 else:
     CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
 # -------------------------
-# Database (Neon via DATABASE_URL)
+# Database (DATABASE_URL)
 # -------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -155,10 +152,12 @@ if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
-            conn_max_age=600,
+            conn_max_age=0,
             ssl_require=not DEBUG,
         )
     }
+    # ✅ Helps Django detect/recover from dropped DB connections safely
+    DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 else:
     DATABASES = {
         "default": {
@@ -167,6 +166,9 @@ else:
         }
     }
 
+# -------------------------
+# Cloudinary
+# -------------------------
 CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
 if CLOUDINARY_URL:
     cloudinary.config(cloudinary_url=CLOUDINARY_URL, secure=True)
@@ -199,7 +201,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else 
 # -------------------------
 # Cloudinary (media) + Django 5.2 storage config
 # -------------------------
-
 STORAGES = {
     # MEDIA (uploads): Cloudinary
     "default": {
